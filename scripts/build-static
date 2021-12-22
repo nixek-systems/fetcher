@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eux
+
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
+docker build -t localhost/nixek-builder ./docker
+
+cd ../
+
+docker run --user="$(id -u)" -e RUST_BACKTRACE=1 -v $(pwd):/src -it -w /src localhost/nixek-fetcher-builder:latest cargo build --release
+
+strip ./target/release/nixek-fetcher
+
+echo "Built ./target/release/nixek-fetcher"
+
+cp ./target/release/nixek-fetcher ./nix/nixek-fetcher
+
+echo "Copied into ./nix/nixek-fetcher"
